@@ -3,7 +3,7 @@ import math
 
 def matrix_create(row, column):  # процедура расширяющая массивы
     a = []
-    if column > 1:  # если не вектор
+    if column > 0:  # если не вектор
         for i in range(row):
             a.append([])
             for j in range(column):
@@ -11,6 +11,13 @@ def matrix_create(row, column):  # процедура расширяющая м�
     else:
         for i in range(column):
             a.append([])
+    return a
+
+
+def vec_create(row):
+    a = []
+    for i in range(row):
+        a.append([])
     return a
 
 
@@ -27,7 +34,8 @@ def matrix_print(a):
         print(r)
 
 
-def choose_matrix(a, b, c):
+def choose_matrix(a, b):
+    c = Tmatrix
     print("Which matrix would you like to choose?")
     cycling = 1
     while cycling == 1:
@@ -72,7 +80,7 @@ class lin_alg:
 
     def size_check(self, func):
         result = 0
-        if (self.row_a == self.row_b) and (self.column_a == self.column_b) and func == 1:
+        if (self.row_a == self.row_b) and (self.column_a == self.column_b) and (func == 1 or func == 3):
             result = 1  # единица если размеры матрицы полностью совпадают и для случая с суммированием и умножением
             self.column_c = self.column_a
             self.row_c = self.row_a
@@ -82,8 +90,11 @@ class lin_alg:
             self.column_c = self.column_b
         elif ((self.row_a == 1) and (self.row_b == 1) and (self.column_a == self.column_b)) and func == 3:
             result = 3  # разрешение для векторной алгебры проверка на то, что введеные матрицы вектора
-        elif (self.column_a != self.column_b) and func == 3:
+        elif (self.column_a != self.column_b) and func == 4:
             result = 4  # вектора разной размерности
+        elif (self.column_a == self.column_b) and (self.row_a == self.row_b) and func == 5:
+            self.column_c = self.column_a
+            result = 5
 
         return result
 
@@ -118,16 +129,18 @@ class lin_alg:
         return self.c
 
     def mult_mat_number(self):
-        self.c = choose_matrix(self.a, self.b, self.c)
+        self.c = choose_matrix(self.a, self.b)
+        matrix = self.c
+        # matrix = matrix_create(self.c.row, self.c.column)
         print('Enter the number:')
         n = float(input())
         for i in range(len(self.c)):
-            for j in range(len(self.c[i])):
-                self.c[i][j] = self.c[i][j] * n
-        matrix_print(self.c)
+            for j in range(len(self.c[0])):
+                matrix[i][j] = matrix[i][j] * n
+        matrix_print(matrix)
 
     def transparent(self):
-        self.a = choose_matrix(self.a, self.b, self.c)
+        self.a = choose_matrix(self.a, self.b)
         column = 0
         row = 0
         for i in range(len(self.a)):  # количество строк в матрице
@@ -145,33 +158,86 @@ class lin_alg:
     def scalar_product(self):
         func = 3
         check_size = self.size_check(func)
-        if check_size == 3:
+        if check_size == 1:
             number = 0
             for i in range(len(self.a)):
                 for j in range(len(self.a[i])):
                     number += self.a[i][j] * self.b[i][j]
             print("scalar product of A an B: %s" % number)
-        elif self.row_a != 1:
+        elif self.column_a != 1:
             print("Matrix a is not a vector")
-        elif self.row_b != 1:
+        elif self.column_b != 1:
             print("Matrix b is not a vector")
         elif check_size == 4:
             print("Different sizes of vectors")
 
     def len_vec(self):
-        self.c = choose_matrix(self.matrix_1, self.matrix_2, self.c)
+        self.c = choose_matrix(self.a, self.b)
+        matrix = self.c
         length = 0
         column = 0
-        row = 0
-        for i in range(len(self.c)):  # количество строк в матрице
-            row += 1
         for i in range(1):
             for j in range(len(self.c[i])):  # проходим по одной строке, чтобы узнать размер
                 column += 1  # количество столбцов в матрице
-        if row == 1:
-            for i in range(len(self.c[0])):
-                length += self.c[i] * self.c[i]
+        if column == 1:
+            for i in range(len(self.c)):
+                for j in range(len(self.c[0])):
+                    length += matrix[i][j] * matrix[i][j]
             length = math.sqrt(length)
+            print('Length of chosen vector: %s' % length)
         else:
             print('Not vector!')
         return length
+
+    def vec_mult(self):
+        func = 5
+        check_size = self.size_check(func)
+        if check_size == 5:
+            self.c = choose_matrix(self.a, self.b)
+            for i in range(len(self.c)):
+                for j in range(len(self.c[i])):
+                    if i == len(self.c) - 1:
+                        self.c[i][j] = ((self.a[0][j] * self.b[1][j]) - (self.a[1][j] * self.b[0][j]))
+                    elif i == len(self.c) - 2:
+                        self.c[i][j] = ((self.a[i+1][j] * self.b[0][j]) - (self.a[0][j] * self.b[i+1][j]))
+                    elif i < len(self.c)-2:
+                        self.c[i][j] = ((self.a[i+1][j] * self.b[i+2][j]) - (self.a[i+2][j] * self.b[i+1][j]))
+            matrix_print(self.c)
+        elif self.row_a != 1:
+            print("Matrix a is not a vector")
+        elif self.row_b != 1:
+            print("Matrix b is not a vector")
+        else:
+            print("No vectors detected!")
+
+    def gaus(self):
+        self.c = choose_matrix(self.a, self.b)
+        n = 0
+        for i in range(len(self.a)):  # количество строк в матрице
+            n += 1  # размерность матрицы
+        a = matrix_create(n, n)
+        for i in range(n):
+            for j in range(n):
+                a[i][j] = self.c[i][j]
+        x = matrix_create(n, n)
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    x[i][j] = 1
+                else:
+                    x[i][j] = 0
+        for i in range(n):
+            for j in range(n):
+                self.c[i][j] = self.c[i][j] / self.c[i][i]
+                x[i][j] = x[i][j] / self.c[i][i]
+        for i in range(n):
+            for j in range(n):
+                if i == n - 1:
+                    a[0][j] -= self.c[0][i] * self.c[i][j]
+                    x[0][j] -= x[0][i] * x[i][j]
+                else:
+                    a[i+1][j] -= self.c[i+1][i] * self.c[i][j]
+                    x[i+1][j] -= x[i+1][i] * a[i][j]
+        print('X matrix: ')
+        print()
+        matrix_print(x)
