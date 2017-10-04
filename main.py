@@ -65,6 +65,10 @@ def main():
                 print('Enter new matrix by using command [NEW] or type [0]')
                 flag = 0
                 continue
+        if choice == 'CHEAT':
+            c = classes.lin_alg(matrix[0], matrix[1])
+            flag = 1
+            continue
         if choice == 'SUM' or choice == '2':
             if flag == 1:
                 c.sum()
@@ -72,7 +76,7 @@ def main():
             else:
                 error()
                 continue
-        if choice == 'mult' or choice == '3':
+        if choice == 'MULT' or choice == '3':
             if flag == 1:
                 c.mult()
                 continue
@@ -87,6 +91,30 @@ def main():
         if choice == '5' or choice =='TRANSPARENT':
             if flag == 1:
                 c.transparent()
+                continue
+            else:
+                error()
+        if choice == 'MULTNUM' or choice == '6':
+            if flag == 1:
+                c.mult_mat_number()
+                continue
+            else:
+                error()
+        if choice == 'SCALAR' or choice == '7':
+            if flag == 1:
+                c.scalar_product()
+                continue
+            else:
+                error()
+        if choice == '8' or choice == 'VECMULT':
+            if flag == 1:
+                c.vec_mult()
+                continue
+            else:
+                error()
+        if choice == '9' or choice == 'GAUS':
+            if flag == 1:
+                c.gaus()
                 continue
             else:
                 error()
