@@ -139,8 +139,11 @@ class lin_alg:
                 matrix[i][j] = matrix[i][j] * n
         matrix_print(matrix)
 
-    def transparent(self):
-        self.a = choose_matrix(self.a, self.b)
+    def transparent(self, a, b):
+        if b == 0:
+            self.a = a.matrix
+        else:
+            self.a = b
         column = 0
         row = 0
         for i in range(len(self.a)):  # количество строк в матрице
@@ -154,6 +157,7 @@ class lin_alg:
                 self.c[i][j] = self.a[j][i]
         print("Transparent matrix: ")
         matrix_print(self.c)
+        return self.c
 
     def scalar_product(self):
         func = 3
@@ -210,34 +214,72 @@ class lin_alg:
         else:
             print("No vectors detected!")
 
-    def gaus(self):
-        self.c = choose_matrix(self.a, self.b)
+    def gaus(self, a, b):
+        # разделяем на выбор
+        # либо из приложения, либо из консоли
+        # если запускается из консоли, необходимо указать параметр а равный 0
+        # и наоборот (т.е. параметр b приравнять к нулю например, c.gaus(a, 0)
+        if b == 0:
+            self.c = a.matrix
+        else:
+            self.c = b
         n = 0
         for i in range(len(self.a)):  # количество строк в матрице
             n += 1  # размерность матрицы
+        x = matrix_create(n, n)
         a = matrix_create(n, n)
+        b = matrix_create(n, n)  # вспомогательная матрица, равная на каждом шаге предыдущей* матрице a
         for i in range(n):
             for j in range(n):
                 a[i][j] = self.c[i][j]
-        x = matrix_create(n, n)
         for i in range(n):
             for j in range(n):
                 if i == j:
                     x[i][j] = 1
                 else:
                     x[i][j] = 0
+        # первый шаг из алгоритма, где делим на диагональный элемент
         for i in range(n):
             for j in range(n):
-                self.c[i][j] = self.c[i][j] / self.c[i][i]
-                x[i][j] = x[i][j] / self.c[i][i]
-        for i in range(n):
-            for j in range(n):
-                if i == n - 1:
-                    a[0][j] -= self.c[0][i] * self.c[i][j]
-                    x[0][j] -= x[0][i] * x[i][j]
+                if i != j:
+                    a[i][j] = a[i][j] / a[i][i]
+                    x[i][j] = x[i][j] / a[i][i]
                 else:
-                    a[i+1][j] -= self.c[i+1][i] * self.c[i][j]
-                    x[i+1][j] -= x[i+1][i] * a[i][j]
-        print('X matrix: ')
-        print()
+                    x[i][j] = x[i][j] / a[i][i]
+            for j in range(n):
+                if i == j:
+                    a[i][j] = 1
+                else:
+                    continue
+            for m in range(n):
+                for j in range(n):
+                    b[m][j] = a[m][j]  # *прежде чем перейти к следующему шагу, необходимо запомнить предыдущий
+            # второй шаг алгоритма (обнуляем элемент вне главной диагонали)
+            for k in range(n):
+                if k != i:
+                    for j in range(n):
+                        a[k][j] -= b[k][i] * b[i][j]
+                        x[k][j] -= b[k][i] * x[i][j]
+        print('Matrix x:')
         matrix_print(x)
+        return x  # возвращаем обратную матрицу
+
+    def holezkiy(self, a, b):
+        if b == 0:
+            self.c = a.matrix
+        else:
+            self.c = b
+        n = 0
+        for i in range(len(self.a)):  # количество строк в матрице
+            n += 1  # размерность матрицы
+        l = matrix_create(n, n)
+        l[0][0] = math.sqrt(self.c[0][0])
+        for j in range(n):
+            l[j][0] = a[j][0] / l[0][0]
+        for i in range(n):
+            if i > 0:
+                for j in range(n):
+                     if i == j:
+                        l[i][j] = math.sqrt(self.c[i][j] - summa)
+        # lt = transparent(0, l)
+
