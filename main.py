@@ -90,7 +90,8 @@ def main():
                 error()
         if choice == '5' or choice =='TRANSPARENT':
             if flag == 1:
-                c.transparent()
+                a = classes.choose_matrix(matrix[0], matrix[1])
+                c.transparent(a, 0)
                 continue
             else:
                 error()
@@ -114,7 +115,15 @@ def main():
                 error()
         if choice == '9' or choice == 'GAUS':
             if flag == 1:
-                c.gaus()
+                a = classes.choose_matrix(matrix[0], matrix[1])
+                c.gaus(a, 0)
+                continue
+            else:
+                error()
+        if choice == '10' or choice == 'HOLEZKIY':
+            if flag == 1:
+                a = classes.choose_matrix(matrix[0], matrix[1])
+                c.holezkiy(a, 0)
                 continue
             else:
                 error()
