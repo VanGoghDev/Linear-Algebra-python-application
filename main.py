@@ -123,7 +123,7 @@ def main():
         if choice == '10' or choice == 'HOLEZKIY':
             if flag == 1:
                 a = classes.choose_matrix(matrix[0], matrix[1])
-                c.holezkiy(a, 0)
+                c = c.holezkiy(a, 0)
                 continue
             else:
                 error()
