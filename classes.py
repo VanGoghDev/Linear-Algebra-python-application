@@ -267,19 +267,44 @@ class lin_alg:
     def holezkiy(self, a, b):
         if b == 0:
             self.c = a.matrix
+            self.a = a.matrix
         else:
             self.c = b
         n = 0
-        for i in range(len(self.a)):  # количество строк в матрице
+        for i in range(len(self.c)):  # количество строк в матрице
             n += 1  # размерность матрицы
-        l = matrix_create(n, n)
-        l[0][0] = math.sqrt(self.c[0][0])
-        for j in range(n):
-            l[j][0] = a[j][0] / l[0][0]
+        # self.c = matrix_create(n, n)
+        # находим матрицу L
         for i in range(n):
-            if i > 0:
-                for j in range(n):
-                     if i == j:
-                        l[i][j] = math.sqrt(self.c[i][j] - summa)
-        # lt = transparent(0, l)
+            for k in range(1, i-1):
+                self.c[i][i] -= math.pow(self.c[i][k], 2)
+            self.c[i][i] = math.sqrt(self.c[i][i])
+            for j in range(i+1, n):
+                for k in range(1, i-1):
+                    self.c[j][i] -= self.c[i][k] * self.c[j][k]
+                self.c[j][i] = self.c[j][i]/self.c[i][i]
+        for i in range(n):
+            for k in range(n):
+                if i < k:
+                    self.c[i][k] = 0
+                else:
+                    continue
+        x = matrix_create(n, n)
+        for i in range(n):
+            for j in range(n):
+                x[i][j] = 0
+        for i in range(n-1, -1, -1):
+            if i == n-1:
+                x[i][i] = 1/self.c[i][i] * 1/self.c[i][i]
+            for k in range(i+1, n):
+                x[i][i] = 1/self.c[i][i] * (1 / self.c[i][i] - self.c[k][i] * x[k][i])
+            for j in range(i, -1, -1):
+                for k in range(j+1, n):
+                    x[i][j] = self.c[k][j] * x[k][i]
+                    x[i][j] = - x[i][j] / self.c[j][j]
+                x[j][i] = x[i][j]
+        matrix_print(self.c)
+        print()
+        matrix_print(x)
+        return self.c
 
