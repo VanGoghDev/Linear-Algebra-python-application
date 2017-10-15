@@ -229,6 +229,11 @@ class lin_alg:
         x = matrix_create(n, n)
         a = matrix_create(n, n)
         b = matrix_create(n, n)  # вспомогательная матрица, равная на каждом шаге предыдущей* матрице a
+        sup = []
+        sup2 = []
+        for i in range(n):
+            sup.append([])
+            sup2.append([])
         for i in range(n):
             for j in range(n):
                 a[i][j] = self.c[i][j]
@@ -242,8 +247,45 @@ class lin_alg:
         for i in range(n):
             for j in range(n):
                 if i != j:
-                    a[i][j] = a[i][j] / a[i][i]
-                    x[i][j] = x[i][j] / a[i][i]
+                    if a[i][i] != 0:
+                        a[i][j] = a[i][j] / a[i][i]
+                        x[i][j] = x[i][j] / a[i][i]
+                    elif a[i][i] == 0:
+                        check = 0
+                        d = i + 1
+                        while check == 0:
+                            check = a[d][d]
+                            d += 1
+                        if i < n:
+                            for m in range(n):
+                                sup2[m] = a[i][m]
+                                sup[m] = a[d-1][m]
+                            for m in range(n):
+                                a[i][m] = sup[m]
+                                a[d-1][m] = sup2[m]
+                        if i == n:
+                            for m in range(n):
+                                sup2[m] = a[i][m]
+                                sup[m] = a[0][m]
+                            for m in range(n):
+                                a[i][m] = sup[m]
+                                a[d-1][m] = sup2[m]
+                        if i < n:
+                            for m in range(n):
+                                sup2[m] = x[i][m]
+                                sup[m] = x[d - 1][m]
+                            for m in range(n):
+                                x[i][m] = sup[m]
+                                x[d - 1][m] = sup2[m]
+                        if i == n:
+                            for m in range(n):
+                                sup2[m] = x[i][m]
+                                sup[m] = x[0][m]
+                            for m in range(n):
+                                x[i][m] = sup[m]
+                                x[d - 1][m] = sup2[m]
+                        a[i][j] = a[i][j] / a[i][i]
+                        x[i][j] = x[i][j] / a[i][i]
                 else:
                     x[i][j] = x[i][j] / a[i][i]
             for j in range(n):
