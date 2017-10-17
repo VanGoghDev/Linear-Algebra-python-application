@@ -55,6 +55,25 @@ def choose_matrix(a, b):
     return c
 
 
+def checkmult(a, b):
+    column_b = 0
+    row_a = 0
+    for i in range(len(a)):  # количество строк в матрице
+        row_a += 1
+    for i in range(1):
+        for j in range(len(b[i])):  # проходим по одной строке, чтобы узнать размер
+            column_b += 1  # количество столбцов в матрице
+    c = matrix_create(row_a, column_b)
+    for i in range(len(a)):
+        for j in range(len(b[0])):
+            c[i][j] = 0
+            for k in range(len(a[i])):
+                c[i][j] += a[i][k] * b[k][j]
+    print("composition of a and b:")
+    matrix_print(c)
+    return c
+
+
 class Tmatrix:
     def __init__(self, row, column):
         self.row = row
@@ -317,36 +336,43 @@ class lin_alg:
             n += 1  # размерность матрицы
         # self.c = matrix_create(n, n)
         # находим матрицу L
-        for i in range(n):
-            for k in range(1, i-1):
-                self.c[i][i] -= math.pow(self.c[i][k], 2)
-            self.c[i][i] = math.sqrt(self.c[i][i])
-            for j in range(i+1, n):
-                for k in range(1, i-1):
-                    self.c[j][i] -= self.c[i][k] * self.c[j][k]
-                self.c[j][i] = self.c[j][i]/self.c[i][i]
-        for i in range(n):
-            for k in range(n):
-                if i < k:
-                    self.c[i][k] = 0
-                else:
-                    continue
+        l = matrix_create(n, n)
+        a = matrix_create(n, n)
         x = matrix_create(n, n)
         for i in range(n):
             for j in range(n):
+                l[i][j] = 0
                 x[i][j] = 0
+                a[i][j] = self.c[i][j]
+        l[0][0] = math.sqrt(a[0][0])
+        for i in range(1, n):
+            l[i][0] = a[i][0]/l[0][0]
+
+        for j in range(1, n):
+            summ = 0
+            for p in range(j):
+                summ += math.pow(l[j][p], 2)
+            l[j][j] = math.sqrt(a[j][j] - summ)
+            for i in range(j+1, n):
+                summ = 0
+                for p in range(i):
+                    summ += l[j][p]*l[i][p]
+                l[i][j] = (a[i][j] - summ) / l[j][j]
         for i in range(n-1, -1, -1):
-            if i == n-1:
-                x[i][i] = 1/self.c[i][i] * 1/self.c[i][i]
-            for k in range(i+1, n):
-                x[i][i] = 1/self.c[i][i] * (1 / self.c[i][i] - self.c[k][i] * x[k][i])
             for j in range(i, -1, -1):
-                for k in range(j+1, n):
-                    x[i][j] = self.c[k][j] * x[k][i]
-                    x[i][j] = - x[i][j] / self.c[j][j]
-                x[j][i] = x[i][j]
-        matrix_print(self.c)
+                if i == j:
+                    summ = 0
+                    for k in range(i+1, n):
+                        summ += l[k][i] * x[k][i]
+                    x[i][i] = (1 / l[i][i] - summ) / l[i][i]
+                else:
+                    summ = 0
+                    for k in range(j+1, n):
+                        summ += l[k][j] * x[k][i]
+                    x[i][j] = - summ / l[j][j]
+                    x[j][i] = x[i][j]
+
+        matrix_print(l)
         print()
         matrix_print(x)
-        return self.c
-
+        return x
