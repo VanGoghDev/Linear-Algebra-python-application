@@ -222,9 +222,9 @@ class lin_alg:
                     if i == len(self.c) - 1:
                         self.c[i][j] = ((self.a[0][j] * self.b[1][j]) - (self.a[1][j] * self.b[0][j]))
                     elif i == len(self.c) - 2:
-                        self.c[i][j] = ((self.a[i+1][j] * self.b[0][j]) - (self.a[0][j] * self.b[i+1][j]))
-                    elif i < len(self.c)-2:
-                        self.c[i][j] = ((self.a[i+1][j] * self.b[i+2][j]) - (self.a[i+2][j] * self.b[i+1][j]))
+                        self.c[i][j] = ((self.a[i + 1][j] * self.b[0][j]) - (self.a[0][j] * self.b[i + 1][j]))
+                    elif i < len(self.c) - 2:
+                        self.c[i][j] = ((self.a[i + 1][j] * self.b[i + 2][j]) - (self.a[i + 2][j] * self.b[i + 1][j]))
             matrix_print(self.c)
         elif self.row_a != 1:
             print("Matrix a is not a vector")
@@ -250,9 +250,13 @@ class lin_alg:
         b = matrix_create(n, n)  # вспомогательная матрица, равная на каждом шаге предыдущей* матрице a
         sup = []
         sup2 = []
+        sup3 = []
+        sup4 = []
         for i in range(n):
             sup.append([])
             sup2.append([])
+            sup3.append([])
+            sup4.append([])
         for i in range(n):
             for j in range(n):
                 a[i][j] = self.c[i][j]
@@ -278,31 +282,25 @@ class lin_alg:
                         if i < n:
                             for m in range(n):
                                 sup2[m] = a[i][m]
-                                sup[m] = a[d-1][m]
+                                sup[m] = a[d - 1][m]
+                                sup4[m] = x[i][m]
+                                sup3[m] = x[d - 1][m]
                             for m in range(n):
                                 a[i][m] = sup[m]
-                                a[d-1][m] = sup2[m]
+                                a[d - 1][m] = sup2[m]
+                                x[i][m] = sup3[m]
+                                x[d - 1][m] = sup4[m]
                         if i == n:
                             for m in range(n):
                                 sup2[m] = a[i][m]
                                 sup[m] = a[0][m]
+                                sup4[m] = x[i][m]
+                                sup3[m] = x[0][m]
                             for m in range(n):
                                 a[i][m] = sup[m]
-                                a[d-1][m] = sup2[m]
-                        if i < n:
-                            for m in range(n):
-                                sup2[m] = x[i][m]
-                                sup[m] = x[d - 1][m]
-                            for m in range(n):
-                                x[i][m] = sup[m]
-                                x[d - 1][m] = sup2[m]
-                        if i == n:
-                            for m in range(n):
-                                sup2[m] = x[i][m]
-                                sup[m] = x[0][m]
-                            for m in range(n):
-                                x[i][m] = sup[m]
-                                x[d - 1][m] = sup2[m]
+                                a[d - 1][m] = sup2[m]
+                                x[i][m] = sup3[m]
+                                x[d - 1][m] = sup4[m]
                         a[i][j] = a[i][j] / a[i][i]
                         x[i][j] = x[i][j] / a[i][i]
                 else:
@@ -334,43 +332,53 @@ class lin_alg:
         n = 0
         for i in range(len(self.c)):  # количество строк в матрице
             n += 1  # размерность матрицы
-        # self.c = matrix_create(n, n)
-        # находим матрицу L
+        flag = 0
         l = matrix_create(n, n)
         a = matrix_create(n, n)
         x = matrix_create(n, n)
-        for i in range(n):
-            for j in range(n):
-                l[i][j] = 0
-                x[i][j] = 0
-                a[i][j] = self.c[i][j]
-        l[0][0] = math.sqrt(a[0][0])
-        for i in range(1, n):
-            l[i][0] = a[i][0]/l[0][0]
+        for i in range(1):
+            if self.c[i][0] == 0:
+                flag = 1
+            else:
+                flag = 0
+        if self.c[n - 1][n - 1] == 0 or flag == 1:
+            print("Impossible to use Holezkiy method")
 
-        for j in range(1, n):
-            summ = 0
-            for p in range(j):
-                summ += math.pow(l[j][p], 2)
-            l[j][j] = math.sqrt(a[j][j] - summ)
-            for i in range(j+1, n):
+        else:
+            # self.c = matrix_create(n, n)
+            # находим матрицу L
+            for i in range(n):
+                for j in range(n):
+                    l[i][j] = 0
+                    x[i][j] = 0
+                    a[i][j] = self.c[i][j]
+            l[0][0] = math.sqrt(a[0][0])
+            for i in range(1, n):
+                l[i][0] = a[i][0] / l[0][0]
+
+            for j in range(1, n):
                 summ = 0
-                for p in range(i):
-                    summ += l[j][p]*l[i][p]
-                l[i][j] = (a[i][j] - summ) / l[j][j]
-        for i in range(n-1, -1, -1):
-            for j in range(i, -1, -1):
-                if i == j:
+                for p in range(j):
+                    summ += math.pow(l[j][p], 2)
+                l[j][j] = math.sqrt(a[j][j] - summ)
+                for i in range(j + 1, n):
                     summ = 0
-                    for k in range(i+1, n):
-                        summ += l[k][i] * x[k][i]
-                    x[i][i] = (1 / l[i][i] - summ) / l[i][i]
-                else:
-                    summ = 0
-                    for k in range(j+1, n):
-                        summ += l[k][j] * x[k][i]
-                    x[i][j] = - summ / l[j][j]
-                    x[j][i] = x[i][j]
+                    for p in range(i):
+                        summ += l[j][p] * l[i][p]
+                    l[i][j] = (a[i][j] - summ) / l[j][j]
+            for i in range(n - 1, -1, -1):
+                for j in range(i, -1, -1):
+                    if i == j:
+                        summ = 0
+                        for k in range(i + 1, n):
+                            summ += l[k][i] * x[k][i]
+                        x[i][i] = (1 / l[i][i] - summ) / l[i][i]
+                    else:
+                        summ = 0
+                        for k in range(j + 1, n):
+                            summ += l[k][j] * x[k][i]
+                        x[i][j] = - summ / l[j][j]
+                        x[j][i] = x[i][j]
 
         matrix_print(l)
         print()
